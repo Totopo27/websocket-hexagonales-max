@@ -1,0 +1,30 @@
+{
+  "name": "microtonal-websocket-osc-bridge",
+  "version": "1.0.0",
+  "description": "Puente WebSocket-OSC para teclados microtonales hacia Max MSP",
+  "main": "websocket-osc-bridge.js",
+  "scripts": {
+    "start": "node websocket-osc-bridge.js",
+    "dev": "nodemon websocket-osc-bridge.js"
+  },
+  "keywords": [
+    "websocket",
+    "osc", 
+    "microtonal",
+    "max-msp",
+    "music",
+    "TET"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.14.2",
+    "osc": "^2.4.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
