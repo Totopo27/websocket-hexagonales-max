@@ -1,8 +1,8 @@
 # WebSocket-OSC Bridge para Teclados Microtonales
 
-Sistema completo para conectar teclados microtonales web (19-TET, 31-TET, 41-TET, 53-TET) con Max MSP mediante WebSocket y protocolo OSC.
+Sistema para conectar teclados microtonales web (19-TET, 31-TET, 41-TET, 53-TET) con Max MSP mediante WebSocket y protocolo OSC.
 
-## 🎯 Funcionamiento
+## Funcionamiento
 
 ```
 [Teclado Web] → [WebSocket] → [Servidor Node.js] → [OSC] → [Max MSP]
@@ -13,7 +13,7 @@ Sistema completo para conectar teclados microtonales web (19-TET, 31-TET, 41-TET
 3. **Servidor Bridge**: Convierte WebSocket a OSC
 4. **Max MSP**: Recibe mensajes OSC para síntesis y procesamiento
 
-## 🚀 Instalación
+## Instalación
 
 ### Paso 1: Instalar Node.js
 - Descarga e instala Node.js desde https://nodejs.org
@@ -50,7 +50,7 @@ Añade a tus archivos HTML existentes:
 <script src="microtonal-websocket-client.js"></script>
 ```
 
-## 📡 Configuración de Puertos
+## Configuración de Puertos
 
 ### Puertos por defecto:
 - **WebSocket**: 8080
@@ -65,7 +65,7 @@ const OSC_MAX_PORT = 57120;    // Puerto Max MSP
 const OSC_LOCAL_PORT = 57121;  // Puerto servidor local
 ```
 
-## 🎹 Uso con Teclados Existentes
+## Uso con Teclados Existentes
 
 ### Integración automática
 Si tu HTML contiene:
@@ -92,73 +92,7 @@ bridge.sendScaleChange('ionian');
 bridge.sendOctaveChange(1);
 ```
 
-## 📋 Mensajes OSC Disponibles
-
-### `/microtonal/note_on`
-**Argumentos**: `note_id(int)` `frequency(float)` `velocity(float)` `tet_system(string)` `octave(int)` `note_name(string)`
-
-**Ejemplo**: `/microtonal/note_on 5 261.63 127 "31-TET" 0 "C"`
-
-### `/microtonal/note_off`
-**Argumentos**: `note_id(int)` `frequency(float)` `velocity(float)` `tet_system(string)` `note_name(string)`
-
-**Ejemplo**: `/microtonal/note_off 5 261.63 0 "31-TET" "C"`
-
-**Nota**: El velocity siempre es 0 para indicar liberación de tecla.
-
-### `/microtonal/polyphony`
-**Argumentos**: `active_count(int)` `tet_system(string)`
-
-**Ejemplo**: `/microtonal/polyphony 3 "31-TET"`
-
-### `/microtonal/polyphony/note`
-**Argumentos**: `index(int)` `frequency(float)` `note_id(int)`
-
-**Ejemplo**: `/microtonal/polyphony/note 0 261.63 5`
-
-### `/microtonal/freq_data`
-**Argumentos**: `frequency(float)` `note_name(string)` `tet_position(int)` `octave(int)` `tet_system(string)`
-
-**Ejemplo**: `/microtonal/freq_data 261.63 "C" 0 4 "31-TET"`
-
-### `/microtonal/scale`
-**Argumentos**: `scale_name(string)` `tet_system(string)` `scale_length(int)`
-
-**Ejemplo**: `/microtonal/scale "ionian" "31-TET" 7`
-
-### `/microtonal/octave`
-**Argumentos**: `octave_shift(int)` `tet_system(string)`
-
-**Ejemplo**: `/microtonal/octave 1 "31-TET"`
-
-### `/microtonal/custom`
-**Argumentos**: Variables según definición del usuario
-
-**Ejemplo**: Usuario puede definir `/microtonal/harmony/chord` con argumentos personalizados
-
-## 🎛️ Ejemplos de Uso en Max MSP
-
-### Síntesis básica
-```
-[udpreceive 57120] → [oscroute /microtonal] → [oscroute note_on] → [unpack i f f s i s] → [cycle~] → [*~] → [dac~]
-```
-
-### Polifonía
-```
-[poly~ mi_sintetizador 16] ← [pack i f f] ← [oscroute note_on]
-```
-
-### Control de efectos
-```
-[oscroute scale] → [route ionian dorian] → [diferentes reverbs/delays]
-```
-
-### Análisis harmónico
-```
-[oscroute polyphony/note] → [collect] → [análisis_espectral]
-```
-
-## 🔧 Personalización
+## Personalización
 
 ### Añadir mensajes OSC personalizados
 En el cliente web:
@@ -178,7 +112,7 @@ const BASE_FREQ = 440.0; // Estándar
 // const BASE_FREQ = 432.0; // Alternativo
 ```
 
-## 🐛 Solución de Problemas
+## Solución de Problemas
 
 ### No se conecta el WebSocket
 1. Verificar que el servidor esté corriendo: `npm start`
@@ -200,41 +134,11 @@ const BASE_FREQ = 440.0; // Estándar
 2. Verificar estabilidad de red
 3. Ajustar `maxReconnectAttempts`
 
-## 📈 Rendimiento
-
-### Optimizaciones recomendadas:
-- **WebSocket**: Descompresión deshabilitada para tiempo real
-- **OSC**: Mensajes binarios optimizados  
-- **Max MSP**: Usar `poly~` para polifonía eficiente
-- **Navegador**: Evitar envío de mensajes redundantes
-
 ### Métricas típicas:
 - **Latencia**: < 5ms en red local
 - **Throughput**: > 1000 mensajes/segundo
 - **CPU**: < 5% en servidor Node.js
 
-## 🎼 Sistemas Soportados
-
-| Sistema TET | Notas/Octava | Archivo Ejemplo |
-|-------------|--------------|-----------------|
-| 19-TET      | 19           | keyboard-19tet.html |
-| 31-TET      | 31           | keyboard-31tet.html |
-| 41-TET      | 41           | keyboard-41tet.html |
-| 53-TET      | 53           | keyboard-53tet.html |
-
-## 🤝 Contribuir
-
-1. Fork del repositorio
-2. Crear rama: `git checkout -b feature/nueva-caracteristica`
-3. Commit: `git commit -m 'Añadir nueva característica'`
-4. Push: `git push origin feature/nueva-caracteristica`
-5. Pull Request
-
-## 📄 Licencia
-
-MIT License - Usar, modificar y distribuir libremente.
-
-## 📞 Soporte
 
 - **Issues**: GitHub Issues
 - **Discord**: Servidor de Audio/Música Programática
