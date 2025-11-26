@@ -204,14 +204,6 @@ bridge.sendCustomMessage('/microtonal/harmony/tension', [
 ]);
 ```
 
-### Modificar frecuencias base
-En tus teclados web:
-```javascript
-// Cambiar frecuencia base A4
-const BASE_FREQ = 440.0; // Estándar
-// const BASE_FREQ = 432.0; // Alternativo
-```
-
 ### Cambiar tema (oscuro/claro)
 El servidor incluye un botón de tema en la esquina superior derecha que permite alternar entre modo oscuro y claro. La preferencia se guarda en localStorage.
 
@@ -250,33 +242,5 @@ El servidor incluye un botón de tema en la esquina superior derecha que permite
 - **Throughput**: > 1000 mensajes/segundo
 - **CPU**: < 5% en servidor Node.js
 
-## Sistemas Soportados
 
-| Sistema TET | Notas/Octava | Archivo Ejemplo |
-|-------------|--------------|-----------------|
-| 19-TET      | 19           | keyboard-19tet.html |
-| 31-TET      | 31           | keyboard-31tet.html |
-| 41-TET      | 41           | keyboard-41tet.html |
-| 53-TET      | 53           | keyboard-53tet.html |
 
-## Contribuir
-
-1. Fork del repositorio
-2. Crear rama: `git checkout -b feature/nueva-caracteristica`
-3. Commit: `git commit -m 'Añadir nueva característica'`
-4. Push: `git push origin feature/nueva-caracteristica`
-5. Pull Request
-
-## Licencia
-
-MIT License - Usar, modificar y distribuir libremente.
-
-## Soporte
-
-- **Issues**: GitHub Issues
-- **Discord**: Servidor de Audio/Música Programática
-- **Email**: [tu-email@ejemplo.com]
-
----
-
-**Disfruta explorando la música microtonal con Max MSP!**
