@@ -10,37 +10,37 @@ class MicrotonalWebSocketClient {
         this.tetSystem = options.tetSystem || '31-TET';
         this.autoReconnect = options.autoReconnect !== false;
         this.reconnectDelay = options.reconnectDelay || 3000;
-        
+
         this.ws = null;
         this.isConnected = false;
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = options.maxReconnectAttempts || 10;
-        
+
         // Callbacks
-        this.onConnected = options.onConnected || (() => {});
-        this.onDisconnected = options.onDisconnected || (() => {});
+        this.onConnected = options.onConnected || (() => { });
+        this.onDisconnected = options.onDisconnected || (() => { });
         this.onError = options.onError || console.error;
-        this.onMessage = options.onMessage || (() => {});
-        
+        this.onMessage = options.onMessage || (() => { });
+
         this.init();
     }
-    
+
     init() {
         this.connect();
     }
-    
+
     connect() {
         try {
-            console.log(`🔌 Conectando a ${this.wsUrl}...`);
+            console.log(`[+] Conectando a ${this.wsUrl}...`);
             this.ws = new WebSocket(this.wsUrl);
-            
+
             this.ws.onopen = (event) => {
                 console.log('✅ Conectado al puente OSC');
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
                 this.onConnected(event);
             };
-            
+
             this.ws.onmessage = (event) => {
                 try {
                     const message = JSON.parse(event.data);
@@ -49,38 +49,38 @@ class MicrotonalWebSocketClient {
                     console.error('❌ Error parseando mensaje:', error);
                 }
             };
-            
+
             this.ws.onclose = (event) => {
-                console.log('🔌 Conexión cerrada:', event.code, event.reason);
+                console.log('[-] Conexión cerrada:', event.code, event.reason);
                 this.isConnected = false;
                 this.onDisconnected(event);
-                
+
                 // Auto-reconexión
                 if (this.autoReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
                     this.reconnectAttempts++;
-                    console.log(`🔄 Reintentando conexión (${this.reconnectAttempts}/${this.maxReconnectAttempts}) en ${this.reconnectDelay}ms...`);
+                    console.log(`[>>] Reintentando conexión (${this.reconnectAttempts}/${this.maxReconnectAttempts}) en ${this.reconnectDelay}ms...`);
                     setTimeout(() => this.connect(), this.reconnectDelay);
                 }
             };
-            
+
             this.ws.onerror = (error) => {
                 console.error('❌ Error WebSocket:', error);
                 this.onError(error);
             };
-            
+
         } catch (error) {
             console.error('❌ Error creando WebSocket:', error);
             this.onError(error);
         }
     }
-    
+
     disconnect() {
         this.autoReconnect = false;
         if (this.ws) {
             this.ws.close();
         }
     }
-    
+
     send(message) {
         if (this.isConnected && this.ws) {
             try {
@@ -95,9 +95,9 @@ class MicrotonalWebSocketClient {
             return false;
         }
     }
-    
+
     // Métodos específicos para eventos microtonales
-    
+
     sendNoteOn(noteId, frequency, velocity = 127, noteName = '', octave = 0) {
         return this.send({
             type: 'note_on',
@@ -110,7 +110,7 @@ class MicrotonalWebSocketClient {
             timestamp: Date.now()
         });
     }
-    
+
     sendNoteOff(noteId, frequency, noteName = '') {
         return this.send({
             type: 'note_off',
@@ -122,7 +122,7 @@ class MicrotonalWebSocketClient {
             timestamp: Date.now()
         });
     }
-    
+
     sendFrequencyData(frequency, noteName, tetPosition, octave = 0) {
         return this.send({
             type: 'frequency_data',
@@ -134,11 +134,11 @@ class MicrotonalWebSocketClient {
             timestamp: Date.now()
         });
     }
-    
+
     sendPolyphonyUpdate(activeNotes) {
         const frequencies = activeNotes.map(note => note.frequency);
         const noteIds = activeNotes.map(note => note.id);
-        
+
         return this.send({
             type: 'polyphony_update',
             activeNotesCount: activeNotes.length,
@@ -149,7 +149,7 @@ class MicrotonalWebSocketClient {
             timestamp: Date.now()
         });
     }
-    
+
     sendScaleChange(scaleName, scaleNotes = []) {
         return this.send({
             type: 'scale_change',
@@ -160,7 +160,7 @@ class MicrotonalWebSocketClient {
             timestamp: Date.now()
         });
     }
-    
+
     sendOctaveChange(octaveShift) {
         return this.send({
             type: 'octave_change',
@@ -169,7 +169,7 @@ class MicrotonalWebSocketClient {
             timestamp: Date.now()
         });
     }
-    
+
     sendCustomMessage(oscAddress, args) {
         return this.send({
             type: 'custom',
@@ -193,9 +193,9 @@ function createMicrotonalOSCBridge(options = {}) {
         const tetMatch = title.match(/(\d+)-TET/);
         tetSystem = tetMatch ? `${tetMatch[1]}-TET` : '31-TET';
     }
-    
-    console.log(`🎹 Iniciando puente OSC para ${tetSystem}`);
-    
+
+    console.log(`[>] Iniciando puente OSC para ${tetSystem}`);
+
     return new MicrotonalWebSocketClient({
         ...options,
         tetSystem: tetSystem,
@@ -224,7 +224,7 @@ function createMicrotonalOSCBridge(options = {}) {
 function showConnectionStatus(connected, message = '') {
     // Buscar o crear elemento de estado
     let statusElement = document.getElementById('osc-connection-status');
-    
+
     if (!statusElement) {
         statusElement = document.createElement('div');
         statusElement.id = 'osc-connection-status';
@@ -242,13 +242,13 @@ function showConnectionStatus(connected, message = '') {
         `;
         document.body.appendChild(statusElement);
     }
-    
+
     if (connected) {
-        statusElement.textContent = '🟢 Max MSP Conectado';
+        statusElement.textContent = '[OK] Max MSP Conectado';
         statusElement.style.backgroundColor = '#2ecc71';
         statusElement.style.color = 'white';
     } else {
-        statusElement.textContent = message || '🔴 Max MSP Desconectado';
+        statusElement.textContent = message || '[XX] Max MSP Desconectado';
         statusElement.style.backgroundColor = '#e74c3c';
         statusElement.style.color = 'white';
     }
@@ -260,27 +260,27 @@ function showConnectionStatus(connected, message = '') {
  */
 function integrateMicrotonalKeyboard() {
     const bridge = createMicrotonalOSCBridge();
-    
+
     // Variables para rastrear estado
     let currentOctaveShift = 0;
     let currentScale = 'none';
     let activeNotes = new Map(); // Map para rastrear notas activas
-    
+
     // Override de funciones existentes del teclado
     const originalPlayNote = window.playNote;
     const originalStopNote = window.stopNote;
     const originalTransposeOctave = window.transposeOctave;
     const originalApplyScale = window.applyScale;
-    
+
     // Intercepción de playNote
     if (originalPlayNote) {
-        window.playNote = function(frequency, noteId, noteName = '', velocity = 127) {
+        window.playNote = function (frequency, noteId, noteName = '', velocity = 127) {
             // Llamar función original
             const result = originalPlayNote.call(this, frequency, noteId, noteName, velocity);
-            
+
             // Enviar a Max MSP
             bridge.sendNoteOn(noteId, frequency, velocity, noteName, currentOctaveShift);
-            
+
             // Rastrear nota activa
             activeNotes.set(noteId, {
                 id: noteId,
@@ -289,61 +289,61 @@ function integrateMicrotonalKeyboard() {
                 velocity: velocity,
                 startTime: Date.now()
             });
-            
+
             // Actualizar polifonía
             bridge.sendPolyphonyUpdate(Array.from(activeNotes.values()));
-            
+
             return result;
         };
     }
-    
+
     // Intercepción de stopNote
     if (originalStopNote) {
-        window.stopNote = function(frequency, noteId, noteName = '') {
+        window.stopNote = function (frequency, noteId, noteName = '') {
             // Llamar función original
             const result = originalStopNote.call(this, frequency, noteId, noteName);
-            
+
             // Enviar a Max MSP con velocity 0
             bridge.sendNoteOff(noteId, frequency, noteName);
-            
+
             // Remover de notas activas
             activeNotes.delete(noteId);
-            
+
             // Actualizar polifonía
             bridge.sendPolyphonyUpdate(Array.from(activeNotes.values()));
-            
+
             return result;
         };
     }
-    
+
     // Intercepción de cambios de octava
     if (originalTransposeOctave) {
-        window.transposeOctave = function(direction) {
+        window.transposeOctave = function (direction) {
             const result = originalTransposeOctave.call(this, direction);
-            
+
             // Actualizar tracking y enviar a Max MSP
             if (direction === 'up') currentOctaveShift++;
             else if (direction === 'down') currentOctaveShift--;
             else if (direction === 'reset') currentOctaveShift = 0;
-            
+
             bridge.sendOctaveChange(currentOctaveShift);
-            
+
             return result;
         };
     }
-    
+
     // Intercepción de cambios de escala
     if (originalApplyScale) {
-        window.applyScale = function(scaleName, scaleData) {
+        window.applyScale = function (scaleName, scaleData) {
             const result = originalApplyScale.call(this, scaleName, scaleData);
-            
+
             currentScale = scaleName;
             bridge.sendScaleChange(scaleName, scaleData || []);
-            
+
             return result;
         };
     }
-    
+
     // Listeners para controles UI
     document.addEventListener('DOMContentLoaded', () => {
         // Detectar cambios en selector de escala
@@ -354,26 +354,26 @@ function integrateMicrotonalKeyboard() {
                 bridge.sendScaleChange(currentScale);
             });
         }
-        
+
         // Detectar cambios de octava con botones
         const octaveUp = document.getElementById('octave-up');
         const octaveDown = document.getElementById('octave-down');
         const octaveReset = document.getElementById('reset-octave');
-        
+
         if (octaveUp) {
             octaveUp.addEventListener('click', () => {
                 currentOctaveShift++;
                 bridge.sendOctaveChange(currentOctaveShift);
             });
         }
-        
+
         if (octaveDown) {
             octaveDown.addEventListener('click', () => {
                 currentOctaveShift--;
                 bridge.sendOctaveChange(currentOctaveShift);
             });
         }
-        
+
         if (octaveReset) {
             octaveReset.addEventListener('click', () => {
                 currentOctaveShift = 0;
@@ -381,7 +381,7 @@ function integrateMicrotonalKeyboard() {
             });
         }
     });
-    
+
     return bridge;
 }
 
@@ -393,7 +393,7 @@ window.integrateMicrotonalKeyboard = integrateMicrotonalKeyboard;
 // Auto-inicialización si se detecta un teclado microtonal
 document.addEventListener('DOMContentLoaded', () => {
     if (document.title.includes('-TET') && typeof window.playNote === 'function') {
-        console.log('🎹 Teclado microtonal detectado, iniciando integración OSC...');
+        console.log('[>] Teclado microtonal detectado, iniciando integración OSC...');
         integrateMicrotonalKeyboard();
     }
 });

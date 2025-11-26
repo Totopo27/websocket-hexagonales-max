@@ -1,0 +1,233 @@
+/* Library/style.css - Estilos para la página de inicio del servidor */
+
+:root {
+  /* Dark Mode (Default) */
+  --bg-main: #1e1e1e;
+  --text-main: #fcfaff;
+  --accent: #ea5c2a;
+  --accent-hover: #d14a1b;
+  --panel-bg: rgba(255, 255, 255, 0.05);
+  --input-bg: #fcfaff;
+  --input-text: #1e1e1e;
+  --border-color: #ea5c2a;
+  --shadow-color: rgba(0, 0, 0, 0.2);
+  --header-shadow: rgba(0, 0, 0, 0.4);
+  --button-bg: rgba(255, 255, 255, 0.05);
+  --button-hover-bg: rgba(255, 255, 255, 0.3);
+  --card-bg: rgba(255, 255, 255, 0.08);
+}
+
+body.light-mode {
+  /* Light Mode Overrides */
+  --bg-main: #fcfaff;
+  --text-main: #1e1e1e;
+  --accent: #ea5c2a;
+  --accent-hover: #d14a1b;
+  --panel-bg: rgba(0, 0, 0, 0.05);
+  --input-bg: #ffffff;
+  --input-text: #1e1e1e;
+  --border-color: #ea5c2a;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --header-shadow: rgba(0, 0, 0, 0.1);
+  --button-bg: rgba(0, 0, 0, 0.05);
+  --button-hover-bg: rgba(0, 0, 0, 0.1);
+  --card-bg: rgba(0, 0, 0, 0.03);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 20px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px var(--shadow-color);
+  margin: 20px auto;
+  max-width: 800px;
+  overflow: hidden;
+  animation: fadeIn 0.5s ease-in;
+  border: 1px solid var(--border-color);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.padding {
+  padding: 30px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+h1 {
+  color: var(--text-main);
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+h2 {
+  color: var(--accent);
+  font-size: 1.8em;
+  margin-bottom: 15px;
+}
+
+h3 {
+  color: var(--accent);
+  font-size: 1.4em;
+  margin: 20px 0 10px 0;
+}
+
+p {
+  line-height: 1.6;
+  margin-bottom: 15px;
+  font-size: 1.1em;
+}
+
+.info-box {
+  background: var(--panel-bg);
+  border-left: 4px solid var(--accent);
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 8px;
+}
+
+.info-box p {
+  margin: 8px 0;
+  font-size: 1em;
+}
+
+.info-box strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.folderTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.folderTable th {
+  background: var(--accent);
+  color: white;
+  padding: 15px;
+  text-align: left;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.folderTable td {
+  padding: 15px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 1.1em;
+  color: var(--text-main);
+}
+
+.entryRow {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--button-bg);
+}
+
+.entryRow:hover {
+  background: var(--button-hover-bg);
+  transform: translateX(5px);
+}
+
+.entryRow:hover td {
+  color: var(--text-main);
+}
+
+.entryRow:last-child td {
+  border-bottom: none;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background: var(--button-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s, transform 0.1s;
+  z-index: 1000;
+}
+
+.theme-toggle:hover {
+  background: var(--button-hover-bg);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+  }
+
+  .padding {
+    padding: 20px;
+  }
+
+  .folderTable th,
+  .folderTable td {
+    padding: 12px;
+    font-size: 1em;
+  }
+
+  .theme-toggle {
+    top: 10px;
+    right: 10px;
+    padding: 8px 15px;
+    font-size: 12px;
+  }
+}

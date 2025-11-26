@@ -1,65 +1,84 @@
-# WebSocket-OSC Bridge para Teclados Microtonales
+# Servidor Unificado WebSocket-OSC para Teclados Microtonales
 
-Sistema para conectar teclados microtonales web (19-TET, 31-TET, 41-TET, 53-TET) con Max MSP mediante WebSocket y protocolo OSC.
+**Versión 2.0** - Servidor completo HTTP+WebSocket+OSC para teclados microtonales con integración Max MSP.
+
+## Características
+
+- **Servidor HTTP** integrado (puerto 8001) - sirve teclados microtonales directamente
+- **Servidor WebSocket** (puerto 8080) - comunicación en tiempo real
+- **Puente OSC** hacia Max MSP (puerto 57120)
+- **Página de inicio** con listado automático de proyectos
+- **Librería cliente** reutilizable (`Library/oscLib.js`)
+- **Logging configurable** - modo normal o verbose
+- **Auto-reconexión** y manejo robusto de errores
+- **Tema oscuro/claro** - Paleta de colores personalizable
 
 ## Funcionamiento
 
 ```
-[Teclado Web] → [WebSocket] → [Servidor Node.js] → [OSC] → [Max MSP]
+[Navegador] -> [HTTP:8001] -> [Teclado Web]
+     |
+[WebSocket:8080] -> [Servidor Node.js] -> [OSC:57120] -> [Max MSP]
 ```
 
-1. **Teclado Web**: Genera frecuencias microtonales y eventos
-2. **Cliente WebSocket**: Envía datos desde el navegador
-3. **Servidor Bridge**: Convierte WebSocket a OSC
-4. **Max MSP**: Recibe mensajes OSC para síntesis y procesamiento
+1. **Servidor HTTP**: Sirve los teclados microtonales (HTML/CSS/JS)
+2. **Cliente WebSocket**: Envía eventos musicales desde el navegador
+3. **Puente OSC**: Convierte mensajes WebSocket a protocolo OSC
+4. **Max MSP**: Recibe y procesa los mensajes para síntesis
 
-## Instalación
+## Instalación Rápida
 
 ### Paso 1: Instalar Node.js
 - Descarga e instala Node.js desde https://nodejs.org
 - Versión recomendada: 14.0 o superior
 
-### Paso 2: Configurar el servidor
+### Paso 2: Instalar dependencias
 ```bash
-# Crear directorio del proyecto
-mkdir microtonal-bridge
-cd microtonal-bridge
-
-# Descargar los archivos:
-# - websocket-osc-bridge.js
-# - package.json
-# - microtonal-websocket-client.js
-
-# Instalar dependencias
+cd webSocketOSC
 npm install
+```
 
-# Iniciar servidor
+### Paso 3: Iniciar servidor
+```bash
 npm start
 ```
 
-### Paso 3: Configurar Max MSP
+Verás:
+```
+Servidor Unificado WebSocket-OSC para Teclados Microtonales
+================================================================
+[OK] Servidor HTTP iniciado en puerto 8001
+     Accede a: http://localhost:8001
+[OK] Servidor WebSocket iniciado en puerto 8080
+[OK] Puerto OSC abierto en puerto 57121
+[->] Enviando a Max MSP en 127.0.0.1:57120
+
+[**] Servidor listo para recibir conexiones
+```
+
+### Paso 4: Abrir en navegador
+Abre tu navegador en: **http://localhost:8001**
+
+Verás la página de inicio con todos los proyectos de teclados disponibles.
+
+### Paso 5: Configurar Max MSP
 1. Abre Max MSP
-2. Carga el patch `MicrotonalOSCReceiver.maxpat`
+2. Carga el patch `microtonalOSCReceiver.maxpat`
 3. Haz clic en "port 57120" para activar la recepción OSC
 4. Conecta los outlets según tus necesidades
-
-### Paso 4: Integrar con teclados web
-Añade a tus archivos HTML existentes:
-
-```html
-<script src="microtonal-websocket-client.js"></script>
-```
 
 ## Configuración de Puertos
 
 ### Puertos por defecto:
-- **WebSocket**: 8080
+- **HTTP**: 8001 (servidor web)
+- **WebSocket**: 8080 (comunicación en tiempo real)
 - **OSC salida**: 57120 (hacia Max MSP)
 - **OSC entrada**: 57121 (servidor local)
 
 ### Cambiar puertos (opcional):
-En `websocket-osc-bridge.js`:
+En `websocket-osc-server.js`:
 ```javascript
+const HTTP_PORT = 8001;        // Puerto HTTP
 const WS_PORT = 8080;          // Puerto WebSocket
 const OSC_MAX_PORT = 57120;    // Puerto Max MSP
 const OSC_LOCAL_PORT = 57121;  // Puerto servidor local
@@ -67,14 +86,31 @@ const OSC_LOCAL_PORT = 57121;  // Puerto servidor local
 
 ## Uso con Teclados Existentes
 
-### Integración automática
-Si tu HTML contiene:
-- Título con "X-TET" (ej: "Teclado 31-TET")
-- Función `playNote()` existente
+### Opción 1: Usar Library/oscLib.js (Recomendado)
 
-La integración se activa automáticamente al cargar la página.
+Añade a tu HTML:
+```html
+<script src="/Library/oscLib.js"></script>
+<script src="tu-codigo.js"></script>
+```
 
-### Integración manual
+En tu JavaScript:
+```javascript
+// oscLib.js se conecta automáticamente al cargar la página
+
+// Usar el cliente global
+oscClient.sendNoteOn(noteId, frequency, 127, noteName, octave);
+oscClient.sendNoteOff(noteId, frequency, noteName);
+oscClient.sendScaleChange('ionian');
+oscClient.sendOctaveChange(1);
+```
+
+### Opción 2: Integración manual con microtonal-websocket-client.js
+
+```html
+<script src="/microtonal-websocket-client.js"></script>
+```
+
 ```javascript
 // Crear cliente
 const bridge = createMicrotonalOSCBridge({
@@ -82,14 +118,78 @@ const bridge = createMicrotonalOSCBridge({
     tetSystem: '31-TET'
 });
 
-// Enviar nota
+// Enviar eventos
 bridge.sendNoteOn(noteId, frequency, velocity, noteName, octave);
 bridge.sendNoteOff(noteId, frequency, noteName);
-
-// Otros eventos
 bridge.sendPolyphonyUpdate(activeNotes);
 bridge.sendScaleChange('ionian');
 bridge.sendOctaveChange(1);
+```
+
+## Mensajes OSC Disponibles
+
+### `/microtonal/note_on`
+**Argumentos**: `note_id(int)` `frequency(float)` `velocity(float)` `tet_system(string)` `octave(int)` `note_name(string)`
+
+**Ejemplo**: `/microtonal/note_on 5 261.63 127 "31-TET" 0 "C"`
+
+### `/microtonal/note_off`
+**Argumentos**: `note_id(int)` `frequency(float)` `velocity(float)` `tet_system(string)` `note_name(string)`
+
+**Ejemplo**: `/microtonal/note_off 5 261.63 0 "31-TET" "C"`
+
+**Nota**: El velocity siempre es 0 para indicar liberación de tecla.
+
+### `/microtonal/polyphony`
+**Argumentos**: `active_count(int)` `tet_system(string)`
+
+**Ejemplo**: `/microtonal/polyphony 3 "31-TET"`
+
+### `/microtonal/polyphony/note`
+**Argumentos**: `index(int)` `frequency(float)` `note_id(int)`
+
+**Ejemplo**: `/microtonal/polyphony/note 0 261.63 5`
+
+### `/microtonal/freq_data`
+**Argumentos**: `frequency(float)` `note_name(string)` `tet_position(int)` `octave(int)` `tet_system(string)`
+
+**Ejemplo**: `/microtonal/freq_data 261.63 "C" 0 4 "31-TET"`
+
+### `/microtonal/scale`
+**Argumentos**: `scale_name(string)` `tet_system(string)` `scale_length(int)`
+
+**Ejemplo**: `/microtonal/scale "ionian" "31-TET" 7`
+
+### `/microtonal/octave`
+**Argumentos**: `octave_shift(int)` `tet_system(string)`
+
+**Ejemplo**: `/microtonal/octave 1 "31-TET"`
+
+### `/microtonal/custom`
+**Argumentos**: Variables según definición del usuario
+
+**Ejemplo**: Usuario puede definir `/microtonal/harmony/chord` con argumentos personalizados
+
+## Ejemplos de Uso en Max MSP
+
+### Síntesis básica
+```
+[udpreceive 57120] -> [oscroute /microtonal] -> [oscroute note_on] -> [unpack i f f s i s] -> [cycle~] -> [*~] -> [dac~]
+```
+
+### Polifonía
+```
+[poly~ mi_sintetizador 16] <- [pack i f f] <- [oscroute note_on]
+```
+
+### Control de efectos
+```
+[oscroute scale] -> [route ionian dorian] -> [diferentes reverbs/delays]
+```
+
+### Análisis harmónico
+```
+[oscroute polyphony/note] -> [collect] -> [análisis_espectral]
 ```
 
 ## Personalización
@@ -111,6 +211,9 @@ En tus teclados web:
 const BASE_FREQ = 440.0; // Estándar
 // const BASE_FREQ = 432.0; // Alternativo
 ```
+
+### Cambiar tema (oscuro/claro)
+El servidor incluye un botón de tema en la esquina superior derecha que permite alternar entre modo oscuro y claro. La preferencia se guarda en localStorage.
 
 ## Solución de Problemas
 
@@ -134,11 +237,41 @@ const BASE_FREQ = 440.0; // Estándar
 2. Verificar estabilidad de red
 3. Ajustar `maxReconnectAttempts`
 
+## Rendimiento
+
+### Optimizaciones recomendadas:
+- **WebSocket**: Descompresión deshabilitada para tiempo real
+- **OSC**: Mensajes binarios optimizados  
+- **Max MSP**: Usar `poly~` para polifonía eficiente
+- **Navegador**: Evitar envío de mensajes redundantes
+
 ### Métricas típicas:
 - **Latencia**: < 5ms en red local
 - **Throughput**: > 1000 mensajes/segundo
 - **CPU**: < 5% en servidor Node.js
 
+## Sistemas Soportados
+
+| Sistema TET | Notas/Octava | Archivo Ejemplo |
+|-------------|--------------|-----------------|
+| 19-TET      | 19           | keyboard-19tet.html |
+| 31-TET      | 31           | keyboard-31tet.html |
+| 41-TET      | 41           | keyboard-41tet.html |
+| 53-TET      | 53           | keyboard-53tet.html |
+
+## Contribuir
+
+1. Fork del repositorio
+2. Crear rama: `git checkout -b feature/nueva-caracteristica`
+3. Commit: `git commit -m 'Añadir nueva característica'`
+4. Push: `git push origin feature/nueva-caracteristica`
+5. Pull Request
+
+## Licencia
+
+MIT License - Usar, modificar y distribuir libremente.
+
+## Soporte
 
 - **Issues**: GitHub Issues
 - **Discord**: Servidor de Audio/Música Programática
@@ -146,4 +279,4 @@ const BASE_FREQ = 440.0; // Estándar
 
 ---
 
-**¡Disfruta explorando la música microtonal con Max MSP!** 🎵
+**Disfruta explorando la música microtonal con Max MSP!**

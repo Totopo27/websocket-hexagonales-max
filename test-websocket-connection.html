@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧪 PRUEBA WebSocket-OSC - 31-TET</title>
+    <title>[TEST] PRUEBA WebSocket-OSC - 31-TET</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,19 +13,31 @@
             padding: 20px;
             margin: 0;
         }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
         }
+
         .status {
             padding: 15px;
             border-radius: 8px;
             margin: 10px 0;
             font-weight: bold;
         }
-        .connected { background: #2ecc71; }
-        .disconnected { background: #e74c3c; }
-        .info { background: #3498db; }
+
+        .connected {
+            background: #2ecc71;
+        }
+
+        .disconnected {
+            background: #e74c3c;
+        }
+
+        .info {
+            background: #3498db;
+        }
+
         button {
             padding: 12px 20px;
             margin: 10px 10px 10px 0;
@@ -35,8 +48,15 @@
             cursor: pointer;
             font-size: 14px;
         }
-        button:hover { background: #2980b9; }
-        button:active { transform: scale(0.95); }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
         .log {
             background: #333;
             padding: 15px;
@@ -47,6 +67,7 @@
             font-size: 12px;
             white-space: pre-wrap;
         }
+
         .test-buttons {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -55,78 +76,79 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <h1>🧪 Prueba WebSocket-OSC Bridge</h1>
+        <h1>[TEST] Prueba WebSocket-OSC Bridge</h1>
         <p>Esta página prueba la conexión entre el navegador y Max MSP.</p>
-        
+
         <div id="status" class="status disconnected">
-            🔴 Desconectado del servidor WebSocket
+            [XX] Desconectado del servidor WebSocket
         </div>
-        
+
         <div class="info">
-            <strong>📋 Instrucciones:</strong><br>
+            <strong>[i] Instrucciones:</strong><br>
             1. Asegúrate de que el servidor esté corriendo: <code>npm start</code><br>
             2. Max MSP debe estar abierto con el patch y puerto 57120 activado<br>
             3. Abre la consola del navegador (F12) para ver logs detallados<br>
             4. Haz clic en los botones de prueba abajo
         </div>
-        
+
         <div class="test-buttons">
-            <button onclick="testNoteOn()">🎹 Probar Note ON</button>
-            <button onclick="testNoteOff()">🎹 Probar Note OFF</button>
-            <button onclick="testPolyphony()">🎼 Probar Polifonía</button>
-            <button onclick="testScale()">🎶 Probar Escala</button>
-            <button onclick="testOctave()">🎚️ Probar Octava</button>
-            <button onclick="testFreqData()">🎵 Probar Freq Data</button>
-            <button onclick="reconnect()">🔄 Reconectar</button>
-            <button onclick="clearLog()">🧹 Limpiar Log</button>
+            <button onclick="testNoteOn()">[>] Probar Note ON</button>
+            <button onclick="testNoteOff()">[>] Probar Note OFF</button>
+            <button onclick="testPolyphony()">[>] Probar Polifonía</button>
+            <button onclick="testScale()">[>] Probar Escala</button>
+            <button onclick="testOctave()">[>] Probar Octava</button>
+            <button onclick="testFreqData()">[>] Probar Freq Data</button>
+            <button onclick="reconnect()">[R] Reconectar</button>
+            <button onclick="clearLog()">[C] Limpiar Log</button>
         </div>
-        
-        <h3>📊 Log de Actividad:</h3>
+
+        <h3>[LOG] Log de Actividad:</h3>
         <div id="log" class="log">Esperando conexión...</div>
     </div>
 
     <!-- Cliente WebSocket -->
     <script src="microtonal-websocket-client.js"></script>
-    
+
     <script>
         // Variables globales
         let bridge = null;
         let logElement = null;
         let statusElement = null;
         let noteCounter = 1;
-        
+
         // Función para añadir logs al UI
         function addLog(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString();
             const logEntry = `[${timestamp}] ${message}\n`;
             logElement.textContent += logEntry;
             logElement.scrollTop = logElement.scrollHeight;
-            
+
             // También imprimir en consola
             console.log(`[PRUEBA] ${message}`);
         }
-        
+
         // Actualizar estado de conexión en UI
         function updateStatus(connected, message = '') {
             if (connected) {
                 statusElement.className = 'status connected';
-                statusElement.textContent = '🟢 Conectado al servidor WebSocket';
+                statusElement.textContent = '[OK] Conectado al servidor WebSocket';
             } else {
                 statusElement.className = 'status disconnected';
-                statusElement.textContent = `🔴 ${message || 'Desconectado del servidor WebSocket'}`;
+                statusElement.textContent = `[XX] ${message || 'Desconectado del servidor WebSocket'}`;
             }
         }
-        
+
         // Inicializar cuando se carga la página
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             logElement = document.getElementById('log');
             statusElement = document.getElementById('status');
-            
-            addLog('🚀 Iniciando prueba WebSocket-OSC Bridge...');
-            addLog('🎹 Sistema detectado: 31-TET (desde título de página)');
-            
+
+            addLog('[>] Iniciando prueba WebSocket-OSC Bridge...');
+            addLog('[i] Sistema detectado: 31-TET (desde título de página)');
+
             // Crear cliente WebSocket con logs detallados
             bridge = createMicrotonalOSCBridge({
                 wsUrl: 'ws://localhost:8080',
@@ -137,113 +159,114 @@
                 },
                 onDisconnected: (event) => {
                     updateStatus(false, 'Desconectado');
-                    addLog(`❌ WebSocket desconectado (código: ${event.code})`, 'error');
+                    addLog(`[XX] WebSocket desconectado (código: ${event.code})`, 'error');
                 },
                 onError: (error) => {
                     updateStatus(false, 'Error de conexión');
-                    addLog(`🚨 Error WebSocket: ${error.message || error}`, 'error');
+                    addLog(`[XX] Error WebSocket: ${error.message || error}`, 'error');
                 },
                 onMessage: (message) => {
-                    addLog(`📨 Mensaje del servidor: ${JSON.stringify(message)}`);
+                    addLog(`[<<] Mensaje del servidor: ${JSON.stringify(message)}`);
                 }
             });
-            
-            addLog('⏳ Intentando conectar al servidor WebSocket...');
+
+            addLog('[-] Intentando conectar al servidor WebSocket...');
         });
-        
+
         // Funciones de prueba
         function testNoteOn() {
             if (!bridge) return;
-            
+
             const noteId = noteCounter++;
             const frequency = 261.63 * Math.pow(2, Math.random() * 2 - 1); // Variación aleatoria
             const velocity = Math.floor(Math.random() * 127) + 1;
             const noteName = ['C', 'D', 'E', 'F', 'G', 'A', 'B'][Math.floor(Math.random() * 7)];
-            
-            addLog(`🎹 Enviando NOTE_ON - ID:${noteId} Freq:${frequency.toFixed(2)}Hz Vel:${velocity} Nota:${noteName}`);
-            
+
+            addLog(`[>>] Enviando NOTE_ON - ID:${noteId} Freq:${frequency.toFixed(2)}Hz Vel:${velocity} Nota:${noteName}`);
+
             const success = bridge.sendNoteOn(noteId, frequency, velocity, noteName, 0);
-            addLog(success ? '✅ NOTE_ON enviado' : '❌ Error enviando NOTE_ON');
+            addLog(success ? '[OK] NOTE_ON enviado' : '[XX] Error enviando NOTE_ON');
         }
-        
+
         function testNoteOff() {
             if (!bridge) return;
-            
+
             const noteId = Math.max(1, noteCounter - 1);
             const frequency = 261.63;
             const noteName = 'C';
-            
-            addLog(`🎹 Enviando NOTE_OFF - ID:${noteId} Freq:${frequency}Hz Nota:${noteName}`);
-            
+
+            addLog(`[>>] Enviando NOTE_OFF - ID:${noteId} Freq:${frequency}Hz Nota:${noteName}`);
+
             const success = bridge.sendNoteOff(noteId, frequency, noteName);
-            addLog(success ? '✅ NOTE_OFF enviado' : '❌ Error enviando NOTE_OFF');
+            addLog(success ? '[OK] NOTE_OFF enviado' : '[XX] Error enviando NOTE_OFF');
         }
-        
+
         function testPolyphony() {
             if (!bridge) return;
-            
+
             const activeNotes = [
                 { id: 1, frequency: 261.63, noteName: 'C', velocity: 100, startTime: Date.now() },
                 { id: 2, frequency: 329.63, noteName: 'E', velocity: 90, startTime: Date.now() },
                 { id: 3, frequency: 392.00, noteName: 'G', velocity: 110, startTime: Date.now() }
             ];
-            
-            addLog(`🎼 Enviando POLYPHONY - ${activeNotes.length} notas activas`);
-            
+
+            addLog(`[>>] Enviando POLYPHONY - ${activeNotes.length} notas activas`);
+
             const success = bridge.sendPolyphonyUpdate(activeNotes);
-            addLog(success ? '✅ POLYPHONY enviado' : '❌ Error enviando POLYPHONY');
+            addLog(success ? '[OK] POLYPHONY enviado' : '[XX] Error enviando POLYPHONY');
         }
-        
+
         function testScale() {
             if (!bridge) return;
-            
+
             const scales = ['ionian', 'dorian', 'phrygian', 'lydian', 'mixolydian'];
             const scaleName = scales[Math.floor(Math.random() * scales.length)];
-            
-            addLog(`🎶 Enviando SCALE_CHANGE - ${scaleName}`);
-            
+
+            addLog(`[>>] Enviando SCALE_CHANGE - ${scaleName}`);
+
             const success = bridge.sendScaleChange(scaleName, [0, 2, 4, 5, 7, 9, 11]);
-            addLog(success ? '✅ SCALE enviado' : '❌ Error enviando SCALE');
+            addLog(success ? '[OK] SCALE enviado' : '[XX] Error enviando SCALE');
         }
-        
+
         function testOctave() {
             if (!bridge) return;
-            
+
             const shift = Math.floor(Math.random() * 5) - 2; // -2 a +2
-            
-            addLog(`🎚️ Enviando OCTAVE_CHANGE - Shift:${shift}`);
-            
+
+            addLog(`[>>] Enviando OCTAVE_CHANGE - Shift:${shift}`);
+
             const success = bridge.sendOctaveChange(shift);
-            addLog(success ? '✅ OCTAVE enviado' : '❌ Error enviando OCTAVE');
+            addLog(success ? '[OK] OCTAVE enviado' : '[XX] Error enviando OCTAVE');
         }
-        
+
         function testFreqData() {
             if (!bridge) return;
-            
+
             const frequency = 440.0 * Math.pow(2, Math.random() * 2 - 1);
             const noteName = ['C', 'D', 'E', 'F', 'G', 'A', 'B'][Math.floor(Math.random() * 7)];
             const tetPosition = Math.floor(Math.random() * 31);
             const octave = Math.floor(Math.random() * 3) - 1;
-            
-            addLog(`🎵 Enviando FREQ_DATA - ${frequency.toFixed(2)}Hz ${noteName} Pos:${tetPosition} Oct:${octave}`);
-            
+
+            addLog(`[>>] Enviando FREQ_DATA - ${frequency.toFixed(2)}Hz ${noteName} Pos:${tetPosition} Oct:${octave}`);
+
             const success = bridge.sendFrequencyData(frequency, noteName, tetPosition, octave);
-            addLog(success ? '✅ FREQ_DATA enviado' : '❌ Error enviando FREQ_DATA');
+            addLog(success ? '[OK] FREQ_DATA enviado' : '[XX] Error enviando FREQ_DATA');
         }
-        
+
         function reconnect() {
             if (bridge) {
-                addLog('🔄 Intentando reconectar...');
+                addLog('[R] Intentando reconectar...');
                 bridge.disconnect();
                 setTimeout(() => {
                     bridge.connect();
                 }, 1000);
             }
         }
-        
+
         function clearLog() {
             logElement.textContent = 'Log limpiado.\n';
         }
     </script>
 </body>
+
 </html>
